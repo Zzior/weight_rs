@@ -1,0 +1,6 @@
+storage/**
+!storage/config.dist.json
+.idea/
+.venv/
+__pycache__/
+test/
