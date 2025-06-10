@@ -26,5 +26,5 @@ class DatabaseManager:
 
     def clear_temp(self):
         with Session(self.engine) as session:
-            session.execute(delete(Temp).execution_options(synchronize_session="false"))
+            session.execute(delete(Temp).execution_options(synchronize_session=False))
             session.commit()
