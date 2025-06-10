@@ -22,9 +22,9 @@ class Core:
     @staticmethod
     def save_temp(weights: list[dict]) -> None:
         for data in weights:
-            conf.db.add_temp(data['date'], data['weight'])
+            conf.db.add_temp(datetime.fromisoformat(data['date']), data['weight'])
 
-    def send_weights(self, weights: list[str]) -> None:
+    def send_weights(self, buffer: list[dict]) -> None:
         try:
             temp_data = []
             if self.send_error:
@@ -32,21 +32,14 @@ class Core:
                     self.send_error = False
                     temp_data = [{"date": temp.date.isoformat(), "weight": temp.weight} for temp in conf.db.get_temp()]
 
-            send_data = []
-            now = datetime.now().isoformat()
-            for weight in weights:
-                weight = int(weight[0:-1])
-                if weight > conf.minimal_weight:
-                    send_data.append({"date": now, "weight": weight})
-
-            if not send_data and not temp_data:
+            if not buffer and not temp_data:
                 return
 
             try:
                 response = requests.post(
                     conf.url,
                     auth=self.auth,
-                    json={"location_name": conf.location_name, "ok": True, "results": temp_data + send_data},
+                    json={"location_name": conf.location_name, "ok": True, "results": temp_data + buffer},
                     timeout=(10, 30)
                 )
                 if response.status_code != 200:
@@ -57,7 +50,7 @@ class Core:
 
             except Exception as e:
                 self.send_error = True
-                self.save_temp(send_data)
+                self.save_temp(buffer)
                 conf.logger.write_log("Request error", e=e)
 
         except Exception as e:
@@ -76,8 +69,8 @@ class Core:
 
             else:
                 return False
-        except Exception as e:
-            conf.logger.write_log(f"Error ping", e=e)
+
+        except Exception as _:  # noqa
             return False
 
     def run(self) -> None:
@@ -88,10 +81,15 @@ class Core:
                 threading.Thread(target=self.send_logs, args=["Error get data from scales"], kwargs={"e": data}).start()
 
             else:
-                self.buffer += [data]
+                now = datetime.now().isoformat()
+                for weight in data:
+                    weight = int(weight[0:-1])
+                    if weight > conf.minimal_weight:
+                        self.buffer.append({"date": now, "weight": weight})
+
                 if (datetime.now() - send_time).seconds >= conf.send_interval:
                     send_time = datetime.now()
-                    threading.Thread(target=self.send_weights, args=[data],).start()
+                    threading.Thread(target=self.send_weights, args=[self.buffer]).start()
                     self.buffer = []
 
 
