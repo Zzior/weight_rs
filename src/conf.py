@@ -10,7 +10,7 @@ from meter.meter import WeightReader
 
 class Config:
     def __init__(self):
-        self.app_dir = Path(__file__).parent
+        self.app_dir = Path(__file__).parent.parent
         self.configs_dir = self.app_dir / "storage"
 
         load_dotenv(self.configs_dir / ".env")
