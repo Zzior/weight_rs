@@ -1,5 +1,5 @@
 storage/**
-!storage/config.dist.json
+!storage/.env.dist
 .idea/
 .venv/
 __pycache__/
