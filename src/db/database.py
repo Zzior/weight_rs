@@ -28,3 +28,18 @@ class DatabaseManager:
         with Session(self.engine) as session:
             session.execute(delete(Temp).execution_options(synchronize_session=False))
             session.commit()
+
+    def clear_old_records(self, n_lines: int):
+        print("Clearing old records...")
+        with Session(self.engine) as session:
+            subquery = (
+                select(Temp.date)
+                .order_by(Temp.date.desc())
+                .offset(n_lines)
+                .limit(1)
+                .scalar_subquery()
+            )
+
+            stmt = delete(Temp).where(Temp.date < subquery)
+            session.execute(stmt)
+            session.commit()

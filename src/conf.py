@@ -25,6 +25,7 @@ class Config:
         self.location_name = getenv("LOCATION_NAME")
         self.send_interval = int(getenv("SEND_INTERVAL"))
         self.minimal_weight = int(getenv("MINIMAL_WEIGHT"))
+        self.db_max_records = int(getenv("DB_MAX_RECORDS"))
 
         self.db = DatabaseManager(self.configs_dir / "database.db")
         self.meter = WeightReader(self.port)

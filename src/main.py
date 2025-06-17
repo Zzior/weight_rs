@@ -32,6 +32,9 @@ class Core:
                     self.send_error = False
                     temp_data = [{"date": temp.date.isoformat(), "weight": temp.weight} for temp in conf.db.get_temp()]
 
+                else:
+                    conf.db.clear_old_records(conf.db_max_records)
+
             if not buffer and not temp_data:
                 return
 
