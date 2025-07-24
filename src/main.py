@@ -97,7 +97,7 @@ class Core:
                 for weight in data:
                     weight = int(weight[0:-1])
                     if weight > conf.minimal_weight:
-                        self.buffer.append({"date": now, "weight": weight})
+                        self.buffer.append({"date": datetime.now().isoformat(), "weight": weight})
 
                 # Send interval
                 if now - send_time >= conf.send_interval:
