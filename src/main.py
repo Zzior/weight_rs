@@ -1,3 +1,4 @@
+import time
 import threading
 from datetime import datetime
 
@@ -27,7 +28,7 @@ class Core:
     def send_weights(self, buffer: list[dict]) -> None:
         try:
             temp_data = []
-            if self.send_error:
+            if self.send_error:  # if data can not send: try ping and load old data
                 if self.ping():
                     self.send_error = False
                     temp_data = [{"date": temp.date.isoformat(), "weight": temp.weight} for temp in conf.db.get_temp()]
@@ -77,21 +78,30 @@ class Core:
             return False
 
     def run(self) -> None:
-        send_time = datetime.now()
+        send_time = time.time()
+        read_time = time.time()
 
         for data in conf.meter.get_data():
+            now = time.time()
+
+            # Read interval
+            if now - read_time < conf.read_interval:
+                continue
+
+            read_time = now
+
             if isinstance(data, Exception):
                 threading.Thread(target=self.send_logs, args=["Error get data from scales"], kwargs={"e": data}).start()
 
             else:
-                now = datetime.now().isoformat()
                 for weight in data:
                     weight = int(weight[0:-1])
                     if weight > conf.minimal_weight:
                         self.buffer.append({"date": now, "weight": weight})
 
-                if (datetime.now() - send_time).seconds >= conf.send_interval:
-                    send_time = datetime.now()
+                # Send interval
+                if now - send_time >= conf.send_interval:
+                    send_time = now
                     threading.Thread(target=self.send_weights, args=[self.buffer]).start()
                     self.buffer = []
 
