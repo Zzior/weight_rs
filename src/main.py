@@ -11,7 +11,7 @@ from conf import conf
 class Core:
     def __init__(self):
         self.buffer = []
-        self.send_error = False
+        self.send_error = True
         self.auth = HTTPBasicAuth(conf.login, conf.password)
 
     def send_logs(self, msg: str, e: Exception | None = None) -> None:
