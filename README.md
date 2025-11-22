@@ -59,11 +59,11 @@ The application sends libra data in the following JSON format:
     "ok": true,
     "results": [
         {
-            "date": "2025-06-9T10:00:00.006031",
+            "date": "2025-06-09T10:00:00.006031",
             "weight": -1
         },
         {
-            "date": "2025-06-9T10:00:01.006161",
+            "date": "2025-06-09T10:00:01.006161",
             "weight": 10000000
         }
     ]
